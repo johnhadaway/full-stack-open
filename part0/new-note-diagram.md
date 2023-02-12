@@ -32,7 +32,6 @@ sequenceDiagram
     activate server
     server-->>browser: favicon.ico
     deactivate server
-
 ```
 
 
