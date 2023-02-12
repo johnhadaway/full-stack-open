@@ -5,7 +5,7 @@ sequenceDiagram
     
     browser->>server: HTTP GET https://studies.cs.helsinki.fi/exampleapp/spa
     activate server
-    server-->>browser: HTML
+    server-->>browser: HTML (spa)
     deactivate server
 
     browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
