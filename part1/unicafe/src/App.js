@@ -67,7 +67,7 @@ const App = () => {
       {hasFeedback ? 
         (<Statistics good={feedback.good} neutral={feedback.neutral} bad={feedback.bad}/>) : null}
     </div>
-  )
+  );
 };
 
 export default App;
