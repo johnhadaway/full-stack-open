@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import Filter from './components/Filter'
+import Notification from './components/Notification'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import personsServices from './services/persons'
@@ -9,6 +10,12 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [notification, setNotification] = useState({
+    message: null,
+    error: null
+  })
+  const [showNotification, setShowNotification] = useState(false)
+  const [notificationTimeoutID, setNotificationTimeoutID] = useState(null)
 
   useEffect(() => {
     personsServices
@@ -33,6 +40,17 @@ const App = () => {
             setPersons(persons.map(person => person.id !== nameExists.id ? person : returnedPerson))
             setNewName('')
             setNewNumber('')
+            setNotification({
+              message: `Updated ${returnedPerson.name}`,
+              error: false,
+            })
+            setShowNotification(true)
+            if (notificationTimeoutID) {
+              clearTimeout(notificationTimeoutID)
+            }
+            setNotificationTimeoutID(setTimeout(() => {
+              setShowNotification(false)
+            }, 3000))
           })
       }
     } else {
@@ -49,6 +67,17 @@ const App = () => {
           setPersons(persons.concat(returnedPerson))
           setNewName('')
           setNewNumber('')
+          setNotification({
+            message: `Added ${returnedPerson.name}`,
+            error: false,
+          })
+          setShowNotification(true)
+          if (notificationTimeoutID) {
+            clearTimeout(notificationTimeoutID)
+          }
+          setNotificationTimeoutID(setTimeout(() => {
+            setShowNotification(false)
+          }, 3000))
         })
     }
   }
@@ -72,7 +101,19 @@ const App = () => {
         .deletePerson(id)
         .then(() => {
           setPersons(persons.filter(person => person.id !== id))
-        })
+          setNotification({
+            message: `Removed ${person.name}`,
+            error: false,
+          })
+          setShowNotification(true)
+          if (notificationTimeoutID) {
+            clearTimeout(notificationTimeoutID)
+          }
+          setNotificationTimeoutID(setTimeout(() => {
+            setShowNotification(false)
+          }, 3000))
+        }
+      )
     }
   }
   
@@ -82,7 +123,8 @@ const App = () => {
 
   return (
     <div>
-      <h2>Phonebook</h2>
+      <h1>Phonebook</h1>
+      {showNotification && <Notification message={notification.message} error={notification.type} /> }
       <Filter value={filter} onChange={handleFilterChange} />
       <h2>New entry</h2>
       <PersonForm
@@ -92,7 +134,7 @@ const App = () => {
         onNumberChange={handleNumberChange}
         onSubmit={addPerson}
       />
-      <h2>Numbers</h2>
+      <h1>Numbers</h1>
       <Persons 
         persons={personsToShow} 
         onDeletePerson={handleDeletePerson}
