@@ -33,7 +33,7 @@ const App = () => {
           ...nameExists,
           number: newNumber,
         }
-
+  
         personsServices
           .updatePerson(nameExists.id, personObject)
           .then(returnedPerson => {
@@ -52,6 +52,20 @@ const App = () => {
               setShowNotification(false)
             }, 3000))
           })
+          .catch(error => {
+            setNotification({
+              message: `Information of ${nameExists.name} has already been removed from the server`,
+              error: true,
+            })
+            setShowNotification(true)
+            if (notificationTimeoutID) {
+              clearTimeout(notificationTimeoutID)
+            }
+            setNotificationTimeoutID(setTimeout(() => {
+              setShowNotification(false)
+            }, 3000))
+            setPersons(persons.filter(person => person.id !== nameExists.id))
+          })
       }
     } else {
       event.preventDefault()
@@ -60,7 +74,7 @@ const App = () => {
         name: newName,
         number: newNumber,
       }
-
+  
       personsServices
         .createPerson(personObject)
         .then(returnedPerson => {
@@ -70,6 +84,19 @@ const App = () => {
           setNotification({
             message: `Added ${returnedPerson.name}`,
             error: false,
+          })
+          setShowNotification(true)
+          if (notificationTimeoutID) {
+            clearTimeout(notificationTimeoutID)
+          }
+          setNotificationTimeoutID(setTimeout(() => {
+            setShowNotification(false)
+          }, 3000))
+        })
+        .catch(error => {
+          setNotification({
+            message: `Failed to add ${newName}.`,
+            error: true,
           })
           setShowNotification(true)
           if (notificationTimeoutID) {
