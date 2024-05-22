@@ -1,7 +1,10 @@
 const express = require('express')
 const app = express()
+const morgan = require('morgan')
 
 app.use(express.json())
+app.use(morgan('tiny'))
+morgan.token('body', (request) => JSON.stringify(request.body))
 
 let persons = [
     { 
@@ -48,10 +51,11 @@ app.get('/api/persons/:id', (request, response) => {
 app.delete('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
     persons = persons.filter(person => person.id !== id)
-    response.status(204).end()
+    response.status(204).json()
 })
 
-app.post('/api/persons', (request, response) => {
+const postLogger = morgan(':method :url :status :res[content-length] - :response-time ms :body')
+app.post('/api/persons', postLogger, (request, response, next) => {
     const body = request.body
     if (!body.name || !body.number) {
         return response.status(400).json({
