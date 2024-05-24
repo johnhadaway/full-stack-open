@@ -11,31 +11,10 @@ app.use(express.static('dist'))
 app.use(cors())
 morgan.token('body', (request) => JSON.stringify(request.body))
 
-let persons = [
-    { 
-      "id": 1,
-      "name": "Arto Hellas", 
-      "number": "040-123456"
-    },
-    { 
-      "id": 2,
-      "name": "Ada Lovelace", 
-      "number": "39-44-5323523"
-    },
-    { 
-      "id": 3,
-      "name": "Dan Abramov", 
-      "number": "12-43-234345"
-    },
-    { 
-      "id": 4,
-      "name": "Mary Poppendieck", 
-      "number": "39-23-6423122"
-    }
-]
-
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    Person.find({}).then(persons => {
+        response.json(persons)
+    })
 })
 
 app.get('/info', (request, response) => {
@@ -44,13 +23,9 @@ app.get('/info', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const person = persons.find(person => person.id === id)
-    if (person) {
+    Person.findById(request.params.id).then(person => {
         response.json(person)
-    } else {
-        response.status(404).end()
-    }
+    })
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -68,27 +43,32 @@ app.post('/api/persons', postLogger, (request, response, next) => {
         })
     }
 
-    const nameExists = persons.find(person => person.name === body.name)
+    const nameExists = Person.find({name: body.name})
+    const numberExists = Person.find({number: body.number})
+
     if (nameExists) {
         return response.status(400).json({
             error: 'name must be unique'
         })
     }
-
-    const numberExists = persons.find(person => person.number === body.number)
     if (numberExists) {
         return response.status(400).json({
             error: 'number must be unique'
         })
     }
 
-    const person = {
-        id: Math.floor(Math.random() * 1000),
-        name: body.name,
-        number: body.number
+    if (body.content === undefined) {
+        return response.status(400).json({ error: 'content missing' })
     }
-    persons = persons.concat(person)
-    response.json(person)
+
+    const person = new Person({
+        name: body.name,
+        number: body.number,
+    })
+
+    person.save().then(savedPerson => {
+        response.json(savedPerson)
+    })
 })
 
 const PORT = process.env.PORT
