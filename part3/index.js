@@ -11,6 +11,29 @@ app.use(express.static('dist'))
 app.use(cors())
 morgan.token('body', (request) => JSON.stringify(request.body))
 
+let persons = [
+    { 
+      "id": 1,
+      "name": "Arto Hellas", 
+      "number": "040-123456"
+    },
+    { 
+      "id": 2,
+      "name": "Ada Lovelace", 
+      "number": "39-44-5323523"
+    },
+    { 
+      "id": 3,
+      "name": "Dan Abramov", 
+      "number": "12-43-234345"
+    },
+    { 
+      "id": 4,
+      "name": "Mary Poppendieck", 
+      "number": "39-23-6423122"
+    }
+]
+
 app.get('/api/persons', (request, response) => {
     Person.find({}).then(persons => {
         response.json(persons)
@@ -35,30 +58,13 @@ app.delete('/api/persons/:id', (request, response) => {
 })
 
 const postLogger = morgan(':method :url :status :res[content-length] - :response-time ms :body')
-app.post('/api/persons', postLogger, (request, response, next) => {
+app.post('/api/persons', postLogger, (request, response) => {
     const body = request.body
+
     if (!body.name || !body.number) {
         return response.status(400).json({
-            error: 'name and number required'
+            error: 'content missing'
         })
-    }
-
-    const nameExists = Person.find({name: body.name})
-    const numberExists = Person.find({number: body.number})
-
-    if (nameExists) {
-        return response.status(400).json({
-            error: 'name must be unique'
-        })
-    }
-    if (numberExists) {
-        return response.status(400).json({
-            error: 'number must be unique'
-        })
-    }
-
-    if (body.content === undefined) {
-        return response.status(400).json({ error: 'content missing' })
     }
 
     const person = new Person({
